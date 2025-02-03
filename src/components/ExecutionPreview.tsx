@@ -13,13 +13,23 @@ export default function ExecutionPreview({
     webcontainerInstance,
     className,
 }: ExecutionPreviewProps) {
-    const [url, setUrl] = useState<string | null>(
-        previewUrl || "http://localhost:3000"
-    );
+    const [url, setUrl] = useState<string | null>(previewUrl || null);
 
     useEffect(() => {
-        // For Next.js, always use the standard local development URL
-        setUrl("http://localhost:3000");
+        if (webcontainerInstance) {
+            // Add event listener for server-ready event
+            const handleServerReady = (port: number, serverUrl: string) => {
+                console.log(`Server ready on port ${port}`);
+                setUrl(serverUrl);
+            };
+
+            webcontainerInstance.on("server-ready", handleServerReady);
+
+            // Return cleanup function to remove event listener
+            return () => {
+                webcontainerInstance.off("server-ready", handleServerReady);
+            };
+        }
     }, [webcontainerInstance]);
 
     return (
@@ -38,7 +48,9 @@ export default function ExecutionPreview({
                     }}
                 />
             ) : (
-                <p className="text-gray-400">No preview available</p>
+                <div className="flex items-center justify-center">
+                    <p className="text-gray-400 ml-4">No preview to show</p>
+                </div>
             )}
         </div>
     );
