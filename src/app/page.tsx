@@ -1,24 +1,9 @@
-import CodeRunner from "../components/CodeRunner";
-
-// Simulated LLM-generated backend code (an Express server)
-const generatedCode = `
-const express = require('express');
-const app = express();
-const PORT = 3000;
-
-app.get('/', (req, res) => {
-    res.send('Hello from LLM-generated server!');
-});
-
-app.listen(PORT, () => {
-    console.log(\`Server running on http://localhost:\${PORT}\`);
-});
-`;
+import CodePortal from "../components/CodePortal";
 
 export default function Home() {
     return (
-        <main>
-            <CodeRunner code={generatedCode} />
+        <main className="p-6 bg-gray-900 min-h-screen text-white">
+            <CodePortal />
         </main>
     );
 }
