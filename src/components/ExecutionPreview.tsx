@@ -34,7 +34,7 @@ export default function ExecutionPreview({
 
     return (
         <div
-            className={`bg-gray-800 p-4 rounded w-full h-full flex flex-col items-center justify-center ${className}`}
+            className={`bg-[#161616] p-4 rounded w-full h-full flex flex-col items-center justify-center mt-2 ${className}`}
         >
             <h2 className="text-lg font-bold text-white mb-2">
                 Execution Preview

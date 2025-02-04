@@ -1,84 +1,31 @@
 "use client";
-import { useState } from "react";
-import {
-    FaFolder,
-    FaFile,
-    FaChevronDown,
-    FaChevronRight,
-} from "react-icons/fa";
+import React from "react";
 
 interface FileExplorerProps {
     files: Record<string, { content: string }>;
-    onFileUpdate: (files: Record<string, { content: string }>) => void;
-    webcontainerInstance: any;
+    onFileSelect: (fileName: string) => void;
+    activeFile: string | null;
 }
 
-export default function FileExplorer({
-    files,
-    onFileUpdate,
-    webcontainerInstance,
-}: FileExplorerProps) {
-    const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
-
-    const toggleExpand = (folder: string) => {
-        setExpanded((prev) => ({ ...prev, [folder]: !prev[folder] }));
-    };
-
-    const handleFileUpdate = (
-        updatedFiles: Record<string, { content: string }>
-    ) => {
-        onFileUpdate(updatedFiles);
-        updateWebContainerFiles(updatedFiles);
-    };
-
-    async function updateWebContainerFiles(
-        files: Record<string, { content: string }>
-    ) {
-        if (!webcontainerInstance) return;
-        for (const [filePath, file] of Object.entries(files)) {
-            await webcontainerInstance.fs.writeFile(filePath, file.content);
-        }
-    }
-
-    const renderFileTree = (fileTree: Record<string, { content: string }>) => {
-        return Object.keys(fileTree).map((filePath) => {
-            const isFolder = filePath.includes("/");
-            const parts = filePath.split("/");
-            const fileName = parts.pop()!;
-            const folderPath = parts.join("/");
-
-            if (isFolder && !expanded[folderPath]) return null;
-
-            return (
-                <div key={filePath} className="pl-4">
-                    {isFolder ? (
-                        <div
-                            onClick={() => toggleExpand(folderPath)}
-                            className="cursor-pointer flex items-center"
-                        >
-                            {expanded[folderPath] ? (
-                                <FaChevronDown />
-                            ) : (
-                                <FaChevronRight />
-                            )}
-                            <FaFolder className="ml-2" />
-                            <span className="ml-2">{folderPath}</span>
-                        </div>
-                    ) : (
-                        <div className="flex items-center">
-                            <FaFile className="mr-2" />
-                            <span>{fileName}</span>
-                        </div>
-                    )}
-                </div>
-            );
-        });
-    };
-
+export default function FileExplorer({ files, onFileSelect, activeFile }: FileExplorerProps) {
     return (
-        <div className="w-64 bg-gray-800 p-4 min-h-screen">
-            <h2 className="text-lg font-bold">File Explorer</h2>
-            <div className="mt-4 text-gray-300">{renderFileTree(files)}</div>
+        <div className="w-64 bg-[#161616] p-4 rounded-xl border border-[#2A2A2A] h-full shadow-md">
+            <h2 className="text-lg font-semibold text-gray-300 mb-4 tracking-wide">Files</h2>
+            <ul className="space-y-1">
+                {Object.keys(files).map((fileName) => (
+                    <li
+                        key={fileName}
+                        className={`p-2 cursor-pointer rounded-lg transition-all duration-200 ${
+                            activeFile === fileName
+                                ? "bg-blue-500 text-white font-semibold"
+                                : "text-gray-400 hover:bg-gray-700 hover:text-white"
+                        }`}
+                        onClick={() => onFileSelect(fileName)}
+                    >
+                        {fileName}
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }

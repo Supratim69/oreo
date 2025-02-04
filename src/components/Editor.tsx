@@ -1,33 +1,24 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
-    ssr: false,
-});
+const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 interface EditorProps {
     files: Record<string, { content: string }>;
     onFileUpdate: (files: Record<string, { content: string }>) => void;
-    className?: string;
+    activeFile: string | null;
+    className: string | null;
 }
 
-export default function Editor({
-    files,
-    onFileUpdate,
-    className,
-}: EditorProps) {
-    const [activeFile, setActiveFile] = useState<string | null>(
-        Object.keys(files)[0]
-    );
-    const [content, setContent] = useState<string>(
-        files[activeFile || ""].content || ""
-    );
+export default function Editor({ files, onFileUpdate, activeFile,className }: EditorProps) {
+    const [content, setContent] = useState<string>(activeFile ? files[activeFile].content : "");
 
-    const handleFileChange = (fileName: string) => {
-        setActiveFile(fileName);
-        setContent(files[fileName].content || "");
-    };
+    useEffect(() => {
+        if (activeFile) {
+            setContent(files[activeFile].content);
+        }
+    }, [activeFile]);
 
     const handleEditorChange = (value: string | undefined) => {
         if (value !== undefined && activeFile) {
@@ -37,29 +28,26 @@ export default function Editor({
     };
 
     return (
-        <div className={`flex flex-col bg-gray-900 p-4 rounded ${className}`}>
-            <h2 className="text-lg font-bold text-white mb-2">Editor</h2>
-            <div className="flex gap-2 mb-4">
-                {Object.keys(files).map((file) => (
-                    <button
-                        key={file}
-                        onClick={() => handleFileChange(file)}
-                        className={`px-4 py-2 rounded ${
-                            file === activeFile ? "bg-blue-500" : "bg-gray-700"
-                        }`}
-                    >
-                        {file}
-                    </button>
-                ))}
-            </div>
-            <MonacoEditor
-                height="400px"
-                theme="vs-dark"
-                language="javascript"
-                value={content}
-                onChange={handleEditorChange}
-                options={{ fontSize: 14, minimap: { enabled: false } }}
-            />
+        <div className="mt-2 flex flex-col bg-[#161616] p-4 rounded-xl shadow-lg border border-[#2A2A2A] flex-1">
+            <h2 className="text-xl font-semibold text-gray-300 mb-2 bg-[#0D0D0D] px-3 py-2 rounded-lg">
+                {activeFile || "Select a file"}
+            </h2>
+            {activeFile ? (
+                <MonacoEditor
+                    height="500px"
+                    theme="vs-dark"
+                    language="javascript"
+                    value={content}
+                    onChange={handleEditorChange}
+                    options={{
+                        fontSize: 14,
+                        minimap: { enabled: false },
+                        padding: { top: 10 },
+                    }}
+                />
+            ) : (
+                <p className="text-gray-400 text-center py-10">No file selected</p>
+            )}
         </div>
     );
 }
